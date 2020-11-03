@@ -18,7 +18,8 @@
     "prop-types": "^15.7.2",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
-    "react-scripts": "3.4.1"
+    "react-scripts": "3.4.1",
+    "reactstrap": "^8.7.0"
   },
   "scripts": {
     "start": "webpack-dev-server --open --mode development",
