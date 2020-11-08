@@ -5,7 +5,7 @@
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable react/jsx-one-expression-per-line */
 import React, { Component } from 'react';
-// import { Modal, ModalBody, ModalFooter, ModalHeader } from 'reactstrap';
+import { Modal, ModalBody, ModalFooter, ModalHeader } from 'reactstrap';
 
 import Vigence from './Vigence';
 
@@ -18,15 +18,26 @@ class Offers extends Component {
     super(props);
     this.state = {
       offers: [],
-      // insertModal: false,
-      // form: {
-      //   product_id: '',
-      //   price: '',
-      //   existence: '',
-      //   vigence: '',
-      // },
+      insertModal: false,
+      products: [],
+      productType: 'Selecciona un producto.',
+      form: {
+        product_id: null,
+        price: null,
+        existence: null,
+        vigence: 0,
+      },
     };
   }
+
+  handleFormChange = (event) => {
+    this.setState({ form: { [event.target.name]: event.target.value } });
+  };
+
+  handleSelectChange = (event) => {
+    this.getProductType(event.target.value);
+    // console.log(this.state);
+  };
 
   componentDidMount() {
     const script = document.createElement('script');
@@ -36,28 +47,21 @@ class Offers extends Component {
 
     document.body.appendChild(script);
 
-    this.getOffers();
+    this.getData();
   }
 
-  // handleChange = async (e) => {
-  //   e.persist();
-  //   await this.setState({
-  //     form: {
-  //       ...this.state.form,
-  //       [e.target.name]: e.target.value,
-  //     },
-  //   });
-  //   console.log(this.state.form);
-  // };
+  changeModalState = () => {
+    this.setState({ insertModal: !this.state.insertModal });
+  };
 
-  // changeModalState = () => {
-  //   this.setState({ insertModal: !this.state.insertModal });
-  // };
-
-  getOffers = () => {
+  getData = () => {
     fetch(`${URL}offers/`)
       .then((response) => response.json())
       .then((response) => this.setState({ offers: response }));
+
+    fetch(`${URL}products/`)
+      .then((response) => response.json())
+      .then((response) => this.setState({ products: response }));
   };
 
   destroyOffer = (id) => {
@@ -100,17 +104,29 @@ class Offers extends Component {
     return httpStatus;
   };
 
+  getProductType = (id) => {
+    console.log(id);
+    fetch(`${URL}getType/${id}`)
+      .then((response) => response.json())
+      .then((response) => {
+        this.setState({ productType: response[0].description });
+        // console.log(response[0].description);
+      });
+
+    return true;
+  };
+
   render() {
     return (
       <div className="row">
         <h4>Promociones</h4>
-        {/* <button
+        <button
           type="button"
           className="btn btn-primary ml-auto"
           onClick={() => this.changeModalState()}
         >
           Agregar promoción
-        </button> */}
+        </button>
         <table className="table mt-4">
           <thead className="thead-dark">
             <tr>
@@ -152,86 +168,95 @@ class Offers extends Component {
           </tbody>
         </table>
 
-        {/* <Modal isOpen={this.state.insertModal} className="modal-insert">
+        <Modal isOpen={this.state.insertModal} size="lg" backdrop="static">
           <ModalHeader>
             <button type="button" className="close">
               <span onClick={() => this.changeModalState()}>&times;</span>
             </button>
           </ModalHeader>
-          <ModalBody className="modal-insert">
-            <div className="form-row">
-              <div className="form-group col-md-6">
-                <label htmlFor="product_id">
-                  Producto:
-                  <select
-                    id="product_id"
-                    className="form-control"
-                    name="product_id"
-                    required
-                    onChange={this.handleChange}
-                  >
-                    <option>Selecciona...</option>
-                  </select>
-                </label>
-              </div>
-              <div className="form-group col-md-6">
-                <label htmlFor="type_product">
-                  Tipo de producto:
-                  <input
-                    type="text"
-                    name="type_product"
-                    id="type_product"
-                    className="form-control"
-                    disabled
-                  />
-                </label>
-              </div>
-            </div>
-            <div className="form-row">
-              <div className="form-group col-md-4">
-                <label htmlFor="price">
-                  Precio:
-                  <input
-                    type="number"
-                    name="price"
-                    id="price"
-                    className="form-control"
-                    onChange={this.handleChange}
-                    required
-                  />
-                </label>
-              </div>
-              <div className="form-group col-md-4">
-                <label htmlFor="existence">
-                  Existencia
-                  <input
-                    type="number"
-                    name="existence"
-                    id="existence"
-                    className="form-control"
-                    onChange={this.handleChange}
-                    required
-                  />
-                </label>
-              </div>
-              <div className="form-group d-flex col-md-4">
-                <div className="form-check my-auto mx-md-auto">
-                  <label className="form-check-label" htmlFor="vigence">
-                    <input
-                      className="form-check-input"
-                      type="checkbox"
-                      value="1"
-                      id="vigence"
-                      onChange={this.handleChange}
-                      name="vigence"
-                    />
-                    Vigente
-                  </label>
+          <ModalBody>
+            <div className="create-container">
+              <form className="mt-5">
+                <div className="form-row">
+                  <div className="form-group col-lg-3">
+                    <label htmlFor="product_id">
+                      Producto:
+                      <select
+                        id="product_id"
+                        className="form-control"
+                        name="product_id"
+                        onChange={this.handleSelectChange}
+                        required
+                      >
+                        <option>Selecciona...</option>
+                        {this.state.products.map((product) => {
+                          return (
+                            <option key={product.id} value={product.id}>
+                              {product.name}
+                            </option>
+                          );
+                        })}
+                      </select>
+                    </label>
+                  </div>
+                  <div className="form-group col-lg-3">
+                    <label htmlFor="type_product">
+                      Tipo de producto:
+                      <input
+                        type="text"
+                        name="type_product"
+                        id="type_product"
+                        className="form-control"
+                        value={this.state.productType}
+                        disabled
+                      />
+                    </label>
+                  </div>
+                  <div className="form-group col-lg-2">
+                    <label htmlFor="price">
+                      Precio:
+                      <input
+                        type="number"
+                        name="price"
+                        id="price"
+                        className="form-control"
+                        required
+                      />
+                    </label>
+                  </div>
+                  <div className="form-group col-lg-2">
+                    <label htmlFor="existence">
+                      Existencia
+                      <input
+                        type="number"
+                        name="existence"
+                        id="existence"
+                        className="form-control"
+                        min="1"
+                        pattern="^[0-9]+"
+                        required
+                      />
+                    </label>
+                  </div>
+                  <div className="form-group d-flex col-lg-2">
+                    <div className="form-check my-auto mx-md-auto">
+                      <label className="form-check-label" htmlFor="vigence">
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          value="1"
+                          id="vigence"
+                          name="vigence"
+                        />
+                        Vigente
+                      </label>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </form>
             </div>
           </ModalBody>
-          <ModalFooter className="modal-insert">
+          <ModalFooter>
             <button type="submit" className="btn btn-primary">
               Agregar oferta
             </button>
@@ -244,7 +269,6 @@ class Offers extends Component {
             </button>
           </ModalFooter>
         </Modal>
-         */}
       </div>
     );
   }
