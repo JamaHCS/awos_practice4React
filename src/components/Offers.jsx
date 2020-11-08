@@ -18,7 +18,7 @@ class Offers extends Component {
     super(props);
     this.state = {
       offers: [],
-      insertModal: false,
+      // insertModal: false,
       // form: {
       //   product_id: '',
       //   price: '',
