@@ -3,7 +3,7 @@
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable react/jsx-one-expression-per-line */
 import React, { Component } from 'react';
-import { Modal, ModalBody, ModalFooter, ModalHeader } from 'reactstrap';
+// import { Modal, ModalBody, ModalFooter, ModalHeader } from 'reactstrap';
 
 import Vigence from './Vigence';
 
@@ -17,12 +17,12 @@ class Offers extends Component {
     this.state = {
       offers: [],
       insertModal: false,
-      form: {
-        product_id: '',
-        price: '',
-        existence: '',
-        vigence: '',
-      },
+      // form: {
+      //   product_id: '',
+      //   price: '',
+      //   existence: '',
+      //   vigence: '',
+      // },
     };
   }
 
@@ -37,16 +37,16 @@ class Offers extends Component {
     this.getOffers();
   }
 
-  handleChange = async (e) => {
-    e.persist();
-    await this.setState({
-      form: {
-        ...this.state.form,
-        [e.target.name]: e.target.value,
-      },
-    });
-    console.log(this.state.form);
-  };
+  // handleChange = async (e) => {
+  //   e.persist();
+  //   await this.setState({
+  //     form: {
+  //       ...this.state.form,
+  //       [e.target.name]: e.target.value,
+  //     },
+  //   });
+  //   console.log(this.state.form);
+  // };
 
   changeModalState = () => {
     this.setState({ insertModal: !this.state.insertModal });
@@ -77,7 +77,9 @@ class Offers extends Component {
               <th scope="col">Tipo</th>
               <th scope="col">Precio</th>
               <th scope="col">Existencia</th>
-              <th scope="col">Vigencia</th>
+              <th scope="col" colSpan="2">
+                Vigencia
+              </th>
               <th scope="col">&nbsp;</th>
               <th scope="col">&nbsp;</th>
             </tr>
@@ -85,14 +87,14 @@ class Offers extends Component {
           <tbody>
             {this.state.offers.map((offer) => {
               return (
-                <tr>
+                <tr key={offer.id}>
                   <th scope="row">{offer.id}</th>
                   <td>{offer.product.name}</td>
                   <td>{offer.product.type.description}</td>
                   <td>${offer.price}</td>
                   <td>{offer.existence}</td>
-                  <td>
-                    <Vigence vigence={offer.vigence} />
+                  <td colSpan="2">
+                    <Vigence vigence={offer.vigence} url={URL} id={offer.id} />
                   </td>
                   <td>
                     <button type="button" className="btn btn-warning">
@@ -110,7 +112,7 @@ class Offers extends Component {
           </tbody>
         </table>
 
-        <Modal isOpen={this.state.insertModal} className="modal-insert">
+        {/* <Modal isOpen={this.state.insertModal} className="modal-insert">
           <ModalHeader>
             <button type="button" className="close">
               <span onClick={() => this.changeModalState()}>&times;</span>
@@ -202,6 +204,7 @@ class Offers extends Component {
             </button>
           </ModalFooter>
         </Modal>
+         */}
       </div>
     );
   }
