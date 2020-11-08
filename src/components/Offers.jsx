@@ -1,3 +1,5 @@
+/* eslint-disable prefer-const */
+/* eslint-disable eqeqeq */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable react/no-access-state-in-setstate */
 /* eslint-disable react/destructuring-assignment */
@@ -48,9 +50,9 @@ class Offers extends Component {
   //   console.log(this.state.form);
   // };
 
-  changeModalState = () => {
-    this.setState({ insertModal: !this.state.insertModal });
-  };
+  // changeModalState = () => {
+  //   this.setState({ insertModal: !this.state.insertModal });
+  // };
 
   getOffers = () => {
     fetch(`${URL}offers/`)
@@ -58,17 +60,57 @@ class Offers extends Component {
       .then((response) => this.setState({ offers: response }));
   };
 
+  destroyOffer = (id) => {
+    console.log('Initial state: ');
+    console.log(this.state.offers);
+
+    let array = this.state.offers.slice();
+    let index = null;
+
+    array.map((offer) => {
+      if (id == offer.id) {
+        index = array.indexOf(offer);
+      }
+      return null;
+    });
+
+    this.petitionToDestroy(id);
+
+    array.splice(index, 1);
+
+    this.setState({ offers: array });
+    console.log(`After elimination of id ${id}: `);
+    console.log(array);
+  };
+
+  petitionToDestroy = (id) => {
+    let httpStatus = 400;
+
+    fetch(`${URL}offers/destroy/${id}`).then((response) => {
+      if (response.status == 204) {
+        httpStatus = response.status;
+        console.log(httpStatus);
+        console.log('Offer deleted correctly.');
+        return response.text();
+      }
+      return null;
+    });
+
+    console.log(httpStatus);
+    return httpStatus;
+  };
+
   render() {
     return (
       <div className="row">
         <h4>Promociones</h4>
-        <button
+        {/* <button
           type="button"
           className="btn btn-primary ml-auto"
           onClick={() => this.changeModalState()}
         >
           Agregar promoción
-        </button>
+        </button> */}
         <table className="table mt-4">
           <thead className="thead-dark">
             <tr>
@@ -80,7 +122,6 @@ class Offers extends Component {
               <th scope="col" colSpan="2">
                 Vigencia
               </th>
-              <th scope="col">&nbsp;</th>
               <th scope="col">&nbsp;</th>
             </tr>
           </thead>
@@ -97,12 +138,11 @@ class Offers extends Component {
                     <Vigence vigence={offer.vigence} url={URL} id={offer.id} />
                   </td>
                   <td>
-                    <button type="button" className="btn btn-warning">
-                      Editar
-                    </button>
-                  </td>
-                  <td>
-                    <button type="button" className="btn btn-danger">
+                    <button
+                      type="button"
+                      className="btn btn-danger"
+                      onClick={() => this.destroyOffer(offer.id)}
+                    >
                       Eliminar
                     </button>
                   </td>

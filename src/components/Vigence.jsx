@@ -21,11 +21,16 @@ class Vigence extends Component {
           console.log('Vigence changed correctly.');
           return response.text();
         }
-        alert('Was an exception in the petition. Please, check the console.');
-        return null;
       })
       .then((response) => {
         console.log(JSON.parse(response));
+      })
+      .catch((e) => {
+        alert('Was an exception in the petition. Please, check the console.');
+        console.log(
+          'Was an exception in the petition. Please, check the console.'
+        );
+        console.log(e);
       });
   };
 
