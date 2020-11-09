@@ -21,22 +21,61 @@ class Offers extends Component {
       insertModal: false,
       products: [],
       productType: 'Selecciona un producto.',
-      form: {
-        product_id: null,
-        price: null,
-        existence: null,
-        vigence: 0,
-      },
+
+      product_id: null,
+      price: null,
+      existence: null,
     };
   }
 
+  setOffer = () => {
+    // eslint-disable-next-line camelcase
+    if (product_id === null || price === null || existence === null) {
+      alert('Debes de llenar todos los campos.');
+      return null;
+    }
+
+    let data = new FormData();
+    data.append('product_id', this.state.product_id);
+    data.append('price', this.state.price);
+    data.append('existence', this.state.existence);
+
+    console.log(data);
+
+    fetch(`${URL}offers/store`, {
+      method: 'POST',
+      // mode: 'no-cors',
+      // headers: {
+      //   'Content-Type': 'application/json',
+      // },
+      body: data,
+    })
+      .catch((e) => console.log(`error:${e}`))
+      .then((response) => {
+        console.log(response);
+        if (response.status == 201) {
+          return response.json();
+        }
+        return false;
+      })
+      .then((response) => {
+        console.log(response);
+
+        this.changeModalState();
+        this.resetFormState();
+        this.getData();
+      });
+  };
+
   handleFormChange = (event) => {
-    this.setState({ form: { [event.target.name]: event.target.value } });
+    this.setState({ [event.target.name]: event.target.value });
+    // console.log(event.target);
+    // console.log(this.state);
   };
 
   handleSelectChange = (event) => {
     this.getProductType(event.target.value);
-    // console.log(this.state);
+    this.setState({ product_id: event.target.value });
   };
 
   componentDidMount() {
@@ -50,8 +89,21 @@ class Offers extends Component {
     this.getData();
   }
 
+  resetFormState = () => {
+    this.setState({
+      productType: 'Selecciona un producto.',
+
+      product_id: null,
+      price: null,
+      existence: null,
+    });
+  };
+
   changeModalState = () => {
     this.setState({ insertModal: !this.state.insertModal });
+    if (this.state.insertModal) {
+      this.resetFormState();
+    }
   };
 
   getData = () => {
@@ -167,7 +219,11 @@ class Offers extends Component {
             })}
           </tbody>
         </table>
-
+        <p>
+          Producto: {this.state.product_id} <br />
+          Precio: {this.state.price} <br />
+          Existencia: {this.state.existence} <br />
+        </p>
         <Modal isOpen={this.state.insertModal} size="lg" backdrop="static">
           <ModalHeader>
             <button type="button" className="close">
@@ -212,7 +268,7 @@ class Offers extends Component {
                       />
                     </label>
                   </div>
-                  <div className="form-group col-lg-2">
+                  <div className="form-group col-lg-3">
                     <label htmlFor="price">
                       Precio:
                       <input
@@ -220,11 +276,12 @@ class Offers extends Component {
                         name="price"
                         id="price"
                         className="form-control"
+                        onChange={this.handleFormChange}
                         required
                       />
                     </label>
                   </div>
-                  <div className="form-group col-lg-2">
+                  <div className="form-group col-lg-3">
                     <label htmlFor="existence">
                       Existencia
                       <input
@@ -234,30 +291,21 @@ class Offers extends Component {
                         className="form-control"
                         min="1"
                         pattern="^[0-9]+"
+                        onChange={this.handleFormChange}
                         required
                       />
                     </label>
-                  </div>
-                  <div className="form-group d-flex col-lg-2">
-                    <div className="form-check my-auto mx-md-auto">
-                      <label className="form-check-label" htmlFor="vigence">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          value="1"
-                          id="vigence"
-                          name="vigence"
-                        />
-                        Vigente
-                      </label>
-                    </div>
                   </div>
                 </div>
               </form>
             </div>
           </ModalBody>
           <ModalFooter>
-            <button type="submit" className="btn btn-primary">
+            <button
+              type="submit"
+              className="btn btn-primary"
+              onClick={() => this.setOffer()}
+            >
               Agregar oferta
             </button>
             <button
