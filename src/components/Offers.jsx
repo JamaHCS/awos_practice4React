@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 /* eslint-disable prefer-const */
 /* eslint-disable eqeqeq */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
@@ -22,17 +23,22 @@ class Offers extends Component {
       products: [],
       productType: 'Selecciona un producto.',
 
-      product_id: null,
-      price: null,
-      existence: null,
+      offerToUpdate: null,
+      product_id: 0,
+      price: 0,
+      existence: 0,
     };
   }
 
+  // eslint-disable-next-line consistent-return
   setOffer = () => {
-    // eslint-disable-next-line camelcase
-    if (product_id === null || price === null || existence === null) {
-      alert('Debes de llenar todos los campos.');
-      return null;
+    let url = '';
+    if (this.state.offerToUpdate == null) {
+      console.log('its gonna be a store');
+      url = `${URL}offers/store`;
+    } else {
+      console.log('its gonna be an update');
+      url = `${URL}offers/update/${this.state.offerToUpdate.id}`;
     }
 
     let data = new FormData();
@@ -42,7 +48,7 @@ class Offers extends Component {
 
     console.log(data);
 
-    fetch(`${URL}offers/store`, {
+    fetch(url, {
       method: 'POST',
       // mode: 'no-cors',
       // headers: {
@@ -52,7 +58,7 @@ class Offers extends Component {
     })
       .catch((e) => console.log(`error:${e}`))
       .then((response) => {
-        console.log(response);
+        // console.log(response);
         if (response.status == 201) {
           return response.json();
         }
@@ -64,6 +70,24 @@ class Offers extends Component {
         this.changeModalState();
         this.resetFormState();
         this.getData();
+      });
+  };
+
+  getOffer = (id) => {
+    fetch(`${URL}offers/${id}`)
+      .then((response) => {
+        return response.json();
+      })
+      .then((response) => {
+        console.log(response);
+        this.changeModalState();
+        this.setState({
+          offerToUpdate: response,
+          product_id: response.product.id,
+          price: response.price,
+          existence: response.existence,
+          productType: response.product.type.description,
+        });
       });
   };
 
@@ -93,9 +117,10 @@ class Offers extends Component {
     this.setState({
       productType: 'Selecciona un producto.',
 
-      product_id: null,
-      price: null,
-      existence: null,
+      offerToUpdate: null,
+      product_id: 0,
+      price: 0,
+      existence: 0,
     });
   };
 
@@ -191,6 +216,7 @@ class Offers extends Component {
                 Vigencia
               </th>
               <th scope="col">&nbsp;</th>
+              <th scope="col">&nbsp;</th>
             </tr>
           </thead>
           <tbody>
@@ -204,6 +230,15 @@ class Offers extends Component {
                   <td>{offer.existence}</td>
                   <td colSpan="2">
                     <Vigence vigence={offer.vigence} url={URL} id={offer.id} />
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      className="btn btn-warning"
+                      onClick={() => this.getOffer(offer.id)}
+                    >
+                      Editar
+                    </button>
                   </td>
                   <td>
                     <button
@@ -246,6 +281,17 @@ class Offers extends Component {
                       >
                         <option>Selecciona...</option>
                         {this.state.products.map((product) => {
+                          if (product.id == this.state.product_id) {
+                            return (
+                              <option
+                                key={product.id}
+                                selected
+                                value={product.id}
+                              >
+                                {product.name}
+                              </option>
+                            );
+                          }
                           return (
                             <option key={product.id} value={product.id}>
                               {product.name}
@@ -275,6 +321,7 @@ class Offers extends Component {
                         type="number"
                         name="price"
                         id="price"
+                        value={this.state.price}
                         className="form-control"
                         onChange={this.handleFormChange}
                         required
@@ -289,8 +336,7 @@ class Offers extends Component {
                         name="existence"
                         id="existence"
                         className="form-control"
-                        min="1"
-                        pattern="^[0-9]+"
+                        value={this.state.existence}
                         onChange={this.handleFormChange}
                         required
                       />
@@ -306,7 +352,11 @@ class Offers extends Component {
               className="btn btn-primary"
               onClick={() => this.setOffer()}
             >
-              Agregar oferta
+              {this.state.offerToUpdate != null && (
+                <span>Actualizar oferta</span>
+              )}
+
+              {this.state.offerToUpdate == null && <span>Agregar oferta</span>}
             </button>
             <button
               type="button"
